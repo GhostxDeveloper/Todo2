@@ -1,0 +1,8 @@
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: auto; /* Permitir desplazamiento */
+  background: linear-gradient(to bottom, #f5baba, #a1b5eb);
+}
