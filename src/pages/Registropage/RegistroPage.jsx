@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const LoginPage = () => {
-  const navigate = useNavigate();
+const RegistroPage = () => {
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!email || !username || !password) {
+      setMessage('Todos los campos son obligatorios.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage('Por favor, introduce un email válido.');
+      return;
+    }
     try {
-      const response = await axios.post('http://localhost:3000/login', { email, password });
-      alert(response.data);
-      navigate('/dashboard');
+      const response = await axios.post('http://localhost:3000/add-user', { email, username, password, rol: 2 });
+      setMessage(response.data);
     } catch (error) {
-      setError('Credenciales incorrectas: ' + error.response.data);
+      setMessage('Error al registrar el usuario: ' + error.message);
     }
   };
 
@@ -30,7 +37,7 @@ const LoginPage = () => {
         minHeight="100vh"
       >
         <Typography variant="h4" component="h1" gutterBottom>
-          Iniciar Sesión
+          Registro de Usuario
         </Typography>
         <form noValidate autoComplete="off" onSubmit={handleSubmit}>
           <TextField
@@ -43,6 +50,15 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
           <TextField
+            label="Nombre de Usuario"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
             label="Contraseña"
             type="password"
             variant="outlined"
@@ -52,9 +68,9 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error && (
+          {message && (
             <Typography color="error" variant="body2">
-              {error}
+              {message}
             </Typography>
           )}
           <Button
@@ -64,7 +80,7 @@ const LoginPage = () => {
             fullWidth
             style={{ marginTop: '16px' }}
           >
-            Iniciar Sesión
+            Registrar
           </Button>
         </form>
       </Box>
@@ -72,4 +88,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegistroPage;
