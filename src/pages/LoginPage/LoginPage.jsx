@@ -14,7 +14,6 @@ const LoginPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/login', { email, password });
       
-      // Guardar los datos del usuario en localStorage
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       alert('Inicio de sesión exitoso');
