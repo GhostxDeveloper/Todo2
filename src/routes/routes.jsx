@@ -7,9 +7,14 @@ import RegistroPage from '../pages/Registropage/RegistroPage';
 
 const Routes = () => {
   let routes = useRoutes([
-    { path: "/", element: <RegistroPage /> },
+    { path: "/", element: <LandingPage /> },
     { path: "/login", element: <LoginPage /> },
     { path: "/dashboard", element: <DashboardPage /> },
+    { path: "/register", element: <Register /> },
+
+    // <Route element = {MainLayout }>
+    //   <Route path = "register" element = {RegistroPage} />
+    // </Route>
   ]);
   return routes;
 }

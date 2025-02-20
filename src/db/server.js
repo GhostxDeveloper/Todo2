@@ -1,6 +1,5 @@
-// server.js
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, getDocs, doc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import firebaseConfig from "./firebase.js";
 import express from "express";
 import bodyParser from "body-parser";
@@ -12,13 +11,12 @@ const db = getFirestore(app);
 
 const server = express();
 server.use(bodyParser.json());
-server.use(cors()); // Habilitar CORS
+server.use(cors());
 
 server.post("/add-user", async (req, res) => {
   try {
     const { email, username, password, rol } = req.body;
 
-    // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const docRef = await addDoc(collection(db, "Users"), {
@@ -33,11 +31,32 @@ server.post("/add-user", async (req, res) => {
   }
 });
 
+server.post("/add-task", async (req, res) => {
+  try {
+    const { name, description, timeUntilFinish, remindMe, status, category, tag, userId } = req.body;
+
+    const docRef = await addDoc(collection(db, "Tasks"), {
+      name,
+      description,
+      timeUntilFinish,
+      remindMe,
+      status,
+      category,
+      tag,
+      userId,
+      created_at: new Date(),
+    });
+
+    res.status(200).send("Tarea agregada exitosamente con ID: " + docRef.id);
+  } catch (error) {
+    res.status(500).send("Error al agregar la tarea: " + error.message);
+  }
+});
+
 server.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Realizar una consulta para obtener el documento del usuario por email
     const usersCollection = collection(db, "Users");
     const q = query(usersCollection, where("email", "==", email));
     const querySnapshot = await getDocs(q);
@@ -49,21 +68,79 @@ server.post("/login", async (req, res) => {
     const userDoc = querySnapshot.docs[0];
     const userData = userDoc.data();
 
-    // Comparar la contraseña ingresada con la contraseña hasheada
     const isPasswordValid = await bcrypt.compare(password, userData.password);
 
     if (!isPasswordValid) {
       return res.status(401).send("Contraseña incorrecta.");
     }
 
-    // Actualizar el campo last_login
     await updateDoc(doc(db, "Users", userDoc.id), {
       last_login: new Date(),
     });
 
-    res.status(200).send(`Inicio de sesión exitoso para el usuario: ${userData.email}`);
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      user: {
+        id: userDoc.id,
+        email: userData.email,
+        username: userData.username,
+        rol: userData.rol
+      }
+    });
   } catch (error) {
     res.status(500).send("Error al iniciar sesión: " + error.message);
+  }
+});
+
+server.get("/tasks/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const tasksCollection = collection(db, "Tasks");
+    const q = query(tasksCollection, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+
+    const tasks = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).send("Error al obtener las tareas: " + error.message);
+  }
+});
+
+server.put("/tasks/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { name, description, timeUntilFinish, remindMe, status, category, tag, userId } = req.body;
+
+    const taskRef = doc(db, "Tasks", taskId);
+    await updateDoc(taskRef, {
+      name,
+      description,
+      timeUntilFinish,
+      remindMe,
+      status,
+      category,
+      tag,
+      userId,
+      updated_at: new Date(),
+    });
+
+    res.status(200).send("Tarea actualizada exitosamente");
+  } catch (error) {
+    res.status(500).send("Error al actualizar la tarea: " + error.message);
+  }
+});
+
+server.delete("/tasks/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    await deleteDoc(doc(db, "Tasks", taskId));
+    res.status(200).send("Tarea eliminada exitosamente");
+  } catch (error) {
+    res.status(500).send("Error al eliminar la tarea: " + error.message);
   }
 });
 

@@ -1,33 +1,25 @@
-import React from 'react';
-import { Drawer, List, ListItem, ListItemText, CssBaseline, AppBar, Toolbar, Typography, Box, Collapse } from '@mui/material';
-import { Outlet } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Drawer, List, ListItem, ListItemText, CssBaseline, AppBar, Toolbar, Box } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
-const MainLayout = () => {
-  const [open, setOpen] = React.useState({});
+const MainLayout = ({ children }) => {
+  const [open, setOpen] = useState(true); // Controla si el menu desplegable está abierto o cerrado
 
-  const handleClick = (text) => {
-    setOpen((prevOpen) => ({ ...prevOpen, [text]: !prevOpen[text] }));
+  const handleClick = () => {
+    setOpen(!open); // Cambia el estado de abierto o cerrado
   };
-
-  const menuItems = [
-    { text: 'Perfil', options: ['Opción Uno', 'Opción Dos', 'Opción Tres'] },
-    { text: 'Configuración', options: ['Opción Uno', 'Opción Dos', 'Opción Tres'] },
-    { text: 'Favoritos', options: ['Opción Uno', 'Opción Dos', 'Opción Tres'] },
-  ];
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Bienvenido
-          </Typography>
+          <h1>Dashboard</h1>
         </Toolbar>
       </AppBar>
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -37,38 +29,34 @@ const MainLayout = () => {
             boxSizing: 'border-box',
           },
         }}
-        variant="permanent"
+        variant="persistent"
         anchor="left"
+        open={true}
       >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map(({ text, options }) => (
-              <React.Fragment key={text}>
-                <ListItem button onClick={() => handleClick(text)}>
-                  <ListItemText primary={text} />
-                  {open[text] ? <ExpandLess /> : <ExpandMore />}
-                </ListItem>
-                <Collapse in={open[text]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {options.map((subText) => (
-                      <ListItem button key={subText} sx={{ pl: 4 }}>
-                        <ListItemText primary={subText} />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </React.Fragment>
-            ))}
-          </List>
-        </Box>
+        <List>
+          <ListItem button>
+            <ListItemText primary="Opción 1" />
+          </ListItem>
+          <ListItem button>
+            <ListItemText primary="Opción 2" />
+          </ListItem>
+          <ListItem button onClick={handleClick}>
+            <ListItemText primary="Opción 3" />
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+        </List>
       </Drawer>
+
+      {/* Este es el lugar donde se renderizarán los 'children' */}
       <Box
-        component="main"
-        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, ml: `${drawerWidth}px` }}
+        sx={{
+          marginLeft: `${drawerWidth}px`,
+          padding: 3,
+          width: `calc(100% - ${drawerWidth}px)`,
+          marginTop: 8, // Ajusta el espacio debajo del AppBar
+        }}
       >
-        <Toolbar />
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );

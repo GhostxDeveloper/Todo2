@@ -13,10 +13,14 @@ const LoginPage = () => {
     event.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/login', { email, password });
-      alert(response.data);
+      
+      // Guardar los datos del usuario en localStorage
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      alert('Inicio de sesión exitoso');
       navigate('/dashboard');
     } catch (error) {
-      setError('Credenciales incorrectas: ' + error.response.data);
+      setError('Credenciales incorrectas: ' + error.response.data.message);
     }
   };
 
@@ -67,6 +71,15 @@ const LoginPage = () => {
             Iniciar Sesión
           </Button>
         </form>
+        <Button
+          variant="contained"
+          color="secondary"
+          fullWidth
+          style={{ marginTop: '16px' }}
+          onClick={() => navigate('/register')}
+        >
+          Registrarse
+        </Button>
       </Box>
     </Container>
   );

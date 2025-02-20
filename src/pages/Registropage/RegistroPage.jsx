@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const RegistroPage = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -83,7 +86,17 @@ const RegistroPage = () => {
             Registrar
           </Button>
         </form>
+        <Button
+          variant="contained"
+          color="secondary"
+          fullWidth
+          style={{ marginTop: '16px' }}
+          onClick={() => navigate('/login')}
+        >
+          Iniciar sesion
+        </Button>
       </Box>
+
     </Container>
   );
 };
